@@ -2,6 +2,7 @@
 
 @using Microsoft.AspNetCore.Components
 @using System.ComponentModel.DataAnnotations
+@inject HttpClient Http
 
 <MudDropContainer T="KanbanTaskItem" @ref="_dropContainer" Items="@_tasks" ItemsSelector="@((item,column) => item.Status == column)" ItemDropped="TaskUpdated" Class="d-flex flex-row">
 	<ChildContent>
@@ -68,6 +69,7 @@
 		{
 			new KanBanSections("To Do", false, String.Empty),
 			new KanBanSections("In Process", false, String.Empty),
+			new KanBanSections("Pending", false, String.Empty),
 			new KanBanSections("Done", false, String.Empty),
 		};
 
@@ -127,6 +129,9 @@
 	private void AddTask(KanBanSections section)
 	{
 		_tasks.Add(new KanbanTaskItem(section.NewTaskName, section.Name));
+		KanbanTaskItem newTask = new KanbanTaskItem(section.NewTaskName, section.Name);
+		 async Task SaveTaskItem() =>
+			await Http.PutAsJsonAsync("http://localhost:5112/api/Task/PostTask", newTask);
 		section.NewTaskName = string.Empty;
 		section.NewTaskOpen = false;
 		_dropContainer.Refresh();
