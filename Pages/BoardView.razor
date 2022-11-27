@@ -4,20 +4,20 @@
 @using System.ComponentModel.DataAnnotations
 @inject HttpClient Http
 
-<MudDropContainer T="KanbanTaskItem" @ref="_dropContainer" Items="@_tasks" ItemsSelector="@((item,column) => item.Status == column)" ItemDropped="TaskUpdated" Class="d-flex flex-row">
+<MudDropContainer T="KanbanTaskItem" @ref="_dropContainer" Items="@_tasks" ItemsSelector="@((item,column) => item.State == column)" ItemDropped="TaskUpdated" Class="d-flex flex-row">
 	<ChildContent>
 		@foreach (var item in _sections)
 		{
 			<MudPaper Elevation="0" Width="224px" MinHeight="400px" Class="pa-4 ma-4 d-flex flex-column mud-background-gray rounded-lg">
 				<MudToolBar DisableGutters="true">
-					<MudText Typo="Typo.subtitle1"><b>@item.Name</b></MudText>
+					<MudText Typo="Typo.subtitle1"><b>@item.SectionName</b></MudText>
 					<MudSpacer />
 					<MudMenu Icon="@Icons.Material.Rounded.MoreHoriz" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" ListClass="pa-2 d-flex flex-column" PopoverClass="mud-elevation-25">
 						<MudButton Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Outlined.Delete" OnClick="@( () => DeleteSection(item))">Delete Section</MudButton>
 						<MudButton Size="Size.Small" Color="Color.Default" StartIcon="@Icons.Rounded.Edit">Rename Section</MudButton>
 					</MudMenu>
 				</MudToolBar>
-				<MudDropZone T="KanbanTaskItem" Identifier="@item.Name" Class="mud-height-full" />
+				<MudDropZone T="KanbanTaskItem" Identifier="@item.SectionName" Class="mud-height-full" />
 				@if (item.NewTaskOpen)
 				{
 					<MudPaper Elevation="25" Class="pa-2 rounded-lg">
@@ -49,7 +49,7 @@
 		</MudPaper>
 	</ChildContent>
 	<ItemRenderer>
-		<MudPaper Elevation="25" Class="pa-4 rounded-lg my-3">@context.Name</MudPaper>
+		<MudPaper Elevation="25" Class="pa-4 rounded-lg my-3">@context.Title</MudPaper>
 	</ItemRenderer>
 </MudDropContainer>
 
@@ -61,49 +61,72 @@
 	/* handling board events */
 	private void TaskUpdated(MudItemDropInfo<KanbanTaskItem> info)
 	{
-		info.Item.Status = info.DropzoneIdentifier;
+		info.Item.State = info.DropzoneIdentifier;
 	}
 
 	/* Setup for board  */
 	private List<KanBanSections> _sections = new()
 		{
-			new KanBanSections("To Do", false, String.Empty),
-			new KanBanSections("In Process", false, String.Empty),
+			new KanBanSections("ToDo", false, String.Empty),
+			new KanBanSections("InProcess", false, String.Empty),
 			new KanBanSections("Pending", false, String.Empty),
 			new KanBanSections("Done", false, String.Empty),
 		};
 
 	public class KanBanSections
 	{
-		public string Name { get; init; }
+		public string SectionName { get; init; }
 		public bool NewTaskOpen { get; set; }
 		public string NewTaskName { get; set; }
 
-		public KanBanSections(string name, bool newTaskOpen, string newTaskName)
+		public KanBanSections(string sectionName, bool newTaskOpen, string newTaskName)
 		{
-			Name = name;
+			SectionName = sectionName;
 			NewTaskOpen = newTaskOpen;
 			NewTaskName = newTaskName;
 		}
 	}
+
+	public enum State {
+		Backlog = 1,
+		ToDo = 2,
+		InProgress = 3,
+		Pending = 4,
+		Done = 5,
+	}
+
+	public class User {
+		public int Id { get; set; }
+		public string? Username { get; set; }
+	}
+
 	public class KanbanTaskItem
 	{
-		public string Name { get; init; }
-		public string Status { get; set; }
+		public int? Id { get; set; }
+		public string? Title { get; init; }
+		public string? Description { get; set; }
+		public string State { get; set; }
+		public User? AssignedTo { get; set; }
+		public User? Reporter { get; set; }
 
-		public KanbanTaskItem(string name, string status)
-		{
-			Name = name;
-			Status = status;
+
+		public KanbanTaskItem(int id, string title, string description, string state, User assignedTo, User reporter)
+	{
+			Id = id;
+			Title = title;
+			Description = description;
+			State = state;
+			AssignedTo = assignedTo;
+			Reporter = reporter;
 		}
 	}
 
 	private List<KanbanTaskItem> _tasks = new()
-		{
-			new KanbanTaskItem("Write unit test", "To Do"),
-			new KanbanTaskItem("Some docu stuff", "To Do"),
-			new KanbanTaskItem("Walking the dog", "To Do"),
-		};
+	{
+		//new KanbanTaskItem("Write unit test", "To Do"),
+		//new KanbanTaskItem("Some docu stuff", "To Do"),
+		//new KanbanTaskItem("Walking the dog", "To Do"),
+	};
 
 	KanBanNewForm newSectionModel = new KanBanNewForm();
 
@@ -126,12 +149,14 @@
 		_addSectionOpen = true;
 	}
 
+
 	private void AddTask(KanBanSections section)
 	{
-		_tasks.Add(new KanbanTaskItem(section.NewTaskName, section.Name));
-		KanbanTaskItem newTask = new KanbanTaskItem(section.NewTaskName, section.Name);
-		 async Task SaveTaskItem() =>
-			await Http.PutAsJsonAsync("http://localhost:5112/api/Task/PostTask", newTask);
+
+		_tasks.Add(new KanbanTaskItem(1, section.NewTaskName, "New description", section.SectionName, null, null));
+		KanbanTaskItem newTask = new KanbanTaskItem(1, section.NewTaskName, "New description", section.SectionName, null, null);
+		var response = Http.PostAsJsonAsync("http://localhost:5112/api/Tasks/PostTask", newTask);
+			
 		section.NewTaskName = string.Empty;
 		section.NewTaskOpen = false;
 		_dropContainer.Refresh();
@@ -154,10 +179,10 @@
 
 			_sections.Remove(section);
 
-			var tasks = _tasks.Where(x => x.Status == section.Name);
+			var tasks = _tasks.Where(x => x.State == section.SectionName);
 			foreach (var item in tasks)
 			{
-				item.Status = _sections[newIndex].Name;
+				item.State = _sections[newIndex].SectionName;
 			}
 		}
 	}
