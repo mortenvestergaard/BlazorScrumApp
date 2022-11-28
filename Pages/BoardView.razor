@@ -2,9 +2,10 @@
 
 @using Microsoft.AspNetCore.Components
 @using System.ComponentModel.DataAnnotations
+@using BlazorScrumApp.Models
 @inject HttpClient Http
 
-<MudDropContainer T="KanbanTaskItem" @ref="_dropContainer" Items="@_tasks" ItemsSelector="@((item,column) => item.State == column)" ItemDropped="TaskUpdated" Class="d-flex flex-row">
+<MudDropContainer T="Models.Task" @ref="_dropContainer" Items="@_tasks" ItemsSelector="@((item,column) => item.StateID == column)" ItemDropped="TaskUpdated" Class="d-flex flex-row">
 	<ChildContent>
 		@foreach (var item in _sections)
 		{
@@ -17,7 +18,7 @@
 						<MudButton Size="Size.Small" Color="Color.Default" StartIcon="@Icons.Rounded.Edit">Rename Section</MudButton>
 					</MudMenu>
 				</MudToolBar>
-				<MudDropZone T="KanbanTaskItem" Identifier="@item.SectionName" Class="mud-height-full" />
+				<MudDropZone T="Models.Task" Identifier="@item.SectionName" Class="mud-height-full" />
 				@if (item.NewTaskOpen)
 				{
 					<MudPaper Elevation="25" Class="pa-2 rounded-lg">
@@ -55,11 +56,11 @@
 
 @code {
 	/*Maybe should not be nullable?*/
-	private MudDropContainer<KanbanTaskItem>? _dropContainer;
+	private MudDropContainer<Models.Task>? _dropContainer;
 
 	private bool _addSectionOpen;
 	/* handling board events */
-	private void TaskUpdated(MudItemDropInfo<KanbanTaskItem> info)
+	private void TaskUpdated(MudItemDropInfo<Models.Task> info)
 	{
 		info.Item.State = info.DropzoneIdentifier;
 	}
@@ -87,41 +88,8 @@
 		}
 	}
 
-	public enum State {
-		Backlog = 1,
-		ToDo = 2,
-		InProgress = 3,
-		Pending = 4,
-		Done = 5,
-	}
 
-	public class User {
-		public int Id { get; set; }
-		public string? Username { get; set; }
-	}
-
-	public class KanbanTaskItem
-	{
-		public int? Id { get; set; }
-		public string? Title { get; init; }
-		public string? Description { get; set; }
-		public string State { get; set; }
-		public User? AssignedTo { get; set; }
-		public User? Reporter { get; set; }
-
-
-		public KanbanTaskItem(int id, string title, string description, string state, User assignedTo, User reporter)
-	{
-			Id = id;
-			Title = title;
-			Description = description;
-			State = state;
-			AssignedTo = assignedTo;
-			Reporter = reporter;
-		}
-	}
-
-	private List<KanbanTaskItem> _tasks = new()
+	private List<Models.Task> _tasks = new()
 	{
 		//new KanbanTaskItem("Write unit test", "To Do"),
 		//new KanbanTaskItem("Some docu stuff", "To Do"),
