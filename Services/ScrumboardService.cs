@@ -1,9 +1,10 @@
 ﻿using BlazorScrumApp.Models;
 using System.Net.Http.Json;
+using System.Threading.Tasks;
 
 namespace BlazorScrumApp.Services
 {
-	public class ScrumboardService :IScrumboardService
+	public class ScrumboardService : IScrumboardService
 	{
 		private static HttpClient _client;
 
@@ -30,17 +31,17 @@ namespace BlazorScrumApp.Services
 			return response;
 		}
 
-		public Task<State> CreateState()
+		public async System.Threading.Tasks.Task CreateState(State newState)
+		{
+			await _client.PostAsJsonAsync<State>(_client.BaseAddress + "State/CreateState", newState);
+		}
+
+		public Task<Models.Task> UpdateTask()
 		{
 			throw new NotImplementedException();
 		}
 
 		public Task<Models.Task> CreateTask()
-		{
-			throw new NotImplementedException();
-		}
-
-		public Task<Models.Task> UpdateTask()
 		{
 			throw new NotImplementedException();
 		}

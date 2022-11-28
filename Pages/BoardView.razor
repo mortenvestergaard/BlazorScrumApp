@@ -3,22 +3,25 @@
 @using Microsoft.AspNetCore.Components
 @using System.ComponentModel.DataAnnotations
 @using BlazorScrumApp.Models
+@using BlazorScrumApp.Services
+@using System.Threading.Tasks
 @inject HttpClient Http
+@inject ScrumboardService boardService
 
-<MudDropContainer T="Models.Task" @ref="_dropContainer" Items="@_tasks" ItemsSelector="@((item,column) => item.StateID == column)" ItemDropped="TaskUpdated" Class="d-flex flex-row">
+<MudDropContainer T="Models.Task" @ref="_dropContainer" Items="@_tasks" ItemsSelector="@((item,column) => item.State.Name == column)" ItemDropped="TaskUpdated" Class="d-flex flex-row">
 	<ChildContent>
 		@foreach (var item in _sections)
 		{
 			<MudPaper Elevation="0" Width="224px" MinHeight="400px" Class="pa-4 ma-4 d-flex flex-column mud-background-gray rounded-lg">
 				<MudToolBar DisableGutters="true">
-					<MudText Typo="Typo.subtitle1"><b>@item.SectionName</b></MudText>
+					<MudText Typo="Typo.subtitle1"><b>@item.Name</b></MudText>
 					<MudSpacer />
 					<MudMenu Icon="@Icons.Material.Rounded.MoreHoriz" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" ListClass="pa-2 d-flex flex-column" PopoverClass="mud-elevation-25">
 						<MudButton Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Outlined.Delete" OnClick="@( () => DeleteSection(item))">Delete Section</MudButton>
 						<MudButton Size="Size.Small" Color="Color.Default" StartIcon="@Icons.Rounded.Edit">Rename Section</MudButton>
 					</MudMenu>
 				</MudToolBar>
-				<MudDropZone T="Models.Task" Identifier="@item.SectionName" Class="mud-height-full" />
+				<MudDropZone T="Models.Task" Identifier="@item.Name" Class="mud-height-full" />
 				@if (item.NewTaskOpen)
 				{
 					<MudPaper Elevation="25" Class="pa-2 rounded-lg">
@@ -36,9 +39,9 @@
 			@if (_addSectionOpen)
 			{
 				<MudPaper Elevation="0" Width="224px" Class="pa-4 d-flex flex-column mud-background-gray rounded-lg">
-					<EditForm Model="@newSectionModel" OnValidSubmit="OnValidSectionSubmit">
+					<EditForm Model="@newStateModel" OnValidSubmit="OnValidSectionSubmit">
 						<DataAnnotationsValidator />
-						<MudTextField @bind-Value="newSectionModel.Name" For="@(() => newSectionModel.Name)" Placeholder="New Section" DisableUnderLine="true"></MudTextField>
+						<MudTextField @bind-Value="newStateModel.Name" For="@(() => newStateModel.Name)" Placeholder="New Section" DisableUnderLine="true"></MudTextField>
 						<MudButton ButtonType="ButtonType.Submit" Size="Size.Small" Color="Color.Primary" FullWidth="true">Add Section</MudButton>
 					</EditForm>
 				</MudPaper>
@@ -62,17 +65,10 @@
 	/* handling board events */
 	private void TaskUpdated(MudItemDropInfo<Models.Task> info)
 	{
-		info.Item.State = info.DropzoneIdentifier;
+		info.Item.State.Name = info.DropzoneIdentifier;
 	}
 
 	/* Setup for board  */
-	private List<KanBanSections> _sections = new()
-		{
-			new KanBanSections("ToDo", false, String.Empty),
-			new KanBanSections("InProcess", false, String.Empty),
-			new KanBanSections("Pending", false, String.Empty),
-			new KanBanSections("Done", false, String.Empty),
-		};
 
 	public class KanBanSections
 	{
@@ -88,6 +84,12 @@
 		}
 	}
 
+	private List<State> _sections = new()
+	{
+
+	};
+
+	private List<User> _users = new();
 
 	private List<Models.Task> _tasks = new()
 	{
@@ -96,7 +98,6 @@
 		//new KanbanTaskItem("Walking the dog", "To Do"),
 	};
 
-	KanBanNewForm newSectionModel = new KanBanNewForm();
 
 	public class KanBanNewForm
 	{
@@ -105,10 +106,25 @@
 		public string Name { get; set; }
 	}
 
-	private void OnValidSectionSubmit(EditContext context)
+	protected override async System.Threading.Tasks.Task OnInitializedAsync()
 	{
-		_sections.Add(new KanBanSections(newSectionModel.Name, false, String.Empty));
-		newSectionModel.Name = string.Empty;
+		//var states = await boardService.GetStates();
+		//var tasks = await boardService.GetTasks();
+		//var users = await boardService.GetUsers();
+		//_sections.AddRange(states);
+		//_users.AddRange(users);
+		//_tasks.AddRange(tasks);
+
+	}
+
+	State newStateModel = new State();
+
+	private async System.Threading.Tasks.Task OnValidSectionSubmit(EditContext context)
+	{
+		State newState = new State();
+		await boardService.CreateState(newState);
+		_sections.Add(newState);
+		newStateModel = new State();
 		_addSectionOpen = false;
 	}
 
@@ -118,19 +134,19 @@
 	}
 
 
-	private void AddTask(KanBanSections section)
+	private void AddTask(State section)
 	{
 
-		_tasks.Add(new KanbanTaskItem(1, section.NewTaskName, "New description", section.SectionName, null, null));
-		KanbanTaskItem newTask = new KanbanTaskItem(1, section.NewTaskName, "New description", section.SectionName, null, null);
-		var response = Http.PostAsJsonAsync("http://localhost:5112/api/Tasks/PostTask", newTask);
+		//_tasks.Add(new KanbanTaskItem(1, section.NewTaskName, "New description", section.SectionName, null, null));
+		//KanbanTaskItem newTask = new KanbanTaskItem(1, section.NewTaskName, "New description", section.SectionName, null, null);
+		//var response = Http.PostAsJsonAsync("http://localhost:5112/api/Tasks/PostTask", newTask);
 			
 		section.NewTaskName = string.Empty;
 		section.NewTaskOpen = false;
 		_dropContainer.Refresh();
 	}
 
-	private void DeleteSection(KanBanSections section)
+	private void DeleteSection(State section)
 	{
 		if (_sections.Count == 1)
 		{
@@ -147,10 +163,10 @@
 
 			_sections.Remove(section);
 
-			var tasks = _tasks.Where(x => x.State == section.SectionName);
+			var tasks = _tasks.Where(x => x.State.Name == section.Name);
 			foreach (var item in tasks)
 			{
-				item.State = _sections[newIndex].SectionName;
+				item.State.Name = _sections[newIndex].Name;
 			}
 		}
 	}

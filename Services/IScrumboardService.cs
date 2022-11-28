@@ -1,4 +1,5 @@
 ﻿using BlazorScrumApp.Models;
+using System.Threading.Tasks;
 
 namespace BlazorScrumApp.Services
 {
@@ -8,7 +9,7 @@ namespace BlazorScrumApp.Services
 		Task<List<State>> GetStates();
 		Task<List<User>> GetUsers();
 		Task<Models.Task> CreateTask();
-		Task<State> CreateState();
+		System.Threading.Tasks.Task CreateState(State state);
 		Task<Models.Task> UpdateTask();
 
 	}
