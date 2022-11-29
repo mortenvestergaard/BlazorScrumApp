@@ -15,25 +15,25 @@ namespace BlazorScrumApp.Services
 
 		public async Task<List<Models.Task>> GetTasks()
 		{
-			var response = await _client.GetFromJsonAsync<List<Models.Task>>(_client.BaseAddress + "Task/GetTasks");
+			var response = await _client.GetFromJsonAsync<List<Models.Task>>("https://localhost:7025/api/Task/GetTasks");
 			return response;
 		}
 
 		public async Task<List<State>> GetStates()
 		{
-			var response = await _client.GetFromJsonAsync<List<State>>(_client.BaseAddress + "State/GetStates");
+			var response = await _client.GetFromJsonAsync<List<State>>("https://localhost:7025/api/State/GetStates");
 			return response;
 		}
 
 		public async Task<List<User>> GetUsers()
 		{
-			var response = await _client.GetFromJsonAsync<List<User>>(_client.BaseAddress + "User/GetUsers");
+			var response = await _client.GetFromJsonAsync<List<User>>("https://localhost:7025/api/User/GetUsers");
 			return response;
 		}
 
 		public async System.Threading.Tasks.Task CreateState(State newState)
 		{
-			await _client.PostAsJsonAsync<State>(_client.BaseAddress + "State/CreateState", newState);
+			await _client.PostAsJsonAsync<State>("https://localhost:7025/api/State/CreateState", newState);
 		}
 
 		public Task<Models.Task> UpdateTask()
