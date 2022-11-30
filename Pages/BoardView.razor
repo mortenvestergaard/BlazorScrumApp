@@ -9,7 +9,7 @@
 @inject ScrumboardService boardService
 @inject IDialogService DialogService
 
-<MudDropContainer T="Models.ScrumTask" Items="_tasks" @ref="_dropContainer" ItemsSelector="@((item,column) => item.State.Name == column)" ItemDropped="TaskUpdated" Class="d-flex flex-row">
+<MudDropContainer T="ScrumTask" Items="_tasks" @ref="_dropContainer" ItemsSelector="@((item,column) => item.State.Name == column)" ItemDropped="TaskUpdated" Class="d-flex flex-row">
 	<ChildContent>
 		@foreach (var item in _sections)
 		{
@@ -22,7 +22,7 @@
 						<MudButton Size="Size.Small" Color="Color.Default" StartIcon="@Icons.Rounded.Edit">Rename Section</MudButton>
 					</MudMenu>
 				</MudToolBar>
-				<MudDropZone T="Models.ScrumTask" Identifier="@item.Name" Class="mud-height-full" />
+				<MudDropZone T="ScrumTask" Identifier="@item.Name" Class="mud-height-full" />
 				@if (!item.NewTaskOpen)
 				{
 
@@ -51,19 +51,24 @@
 		</MudPaper>
 	</ChildContent>
 	<ItemRenderer>
-		<MudPaper Elevation="25" Class="pa-4 rounded-lg my-3">@context.Title</MudPaper>
+		<MudPaper Elevation="25" Class="pa-4 rounded-lg my-3">
+			<MudText Typo="Typo.body2">@($"{context.Title} + {context.State.Name}")</MudText>
+		<MudButton OnClick="@(() => OnEditTask(context))" Color="Color.Error">Edit</MudButton>
+		</MudPaper>
 	</ItemRenderer>
 </MudDropContainer>
 
-@code {
+	@code {
 	/*Maybe should not be nullable?*/
-	private MudDropContainer<Models.ScrumTask>? _dropContainer;
+	private MudDropContainer<ScrumTask>? _dropContainer;
 
 	private bool _addSectionOpen;
 	/* handling board events */
-	private void TaskUpdated(MudItemDropInfo<Models.ScrumTask> info)
+	private async void TaskUpdated(MudItemDropInfo<ScrumTask> info)
 	{
+
 		info.Item.State.Name = info.DropzoneIdentifier;
+		await boardService.UpdateTask(info.Item);
 	}
 
 	private List<State> _sections = new()
@@ -73,13 +78,13 @@
 
 	private List<User> _users = new();
 
-	private List<Models.ScrumTask> _tasks = new()
+	private List<ScrumTask> _tasks = new()
 	{
 
 	};
 
 
-	protected override async System.Threading.Tasks.Task OnInitializedAsync()
+	protected override async Task OnInitializedAsync()
 	{
 		var states = await boardService.GetStates();
 		_sections.AddRange(states);
@@ -91,8 +96,7 @@
 	}
 
 	State newState = new State();
-
-	private async System.Threading.Tasks.Task OnValidSectionSubmit(EditContext context)
+	private async Task OnValidSectionSubmit(EditContext context)
 	{
 		State newState = new State();
 		await boardService.CreateState(newState);
@@ -107,6 +111,10 @@
 		_addSectionOpen = true;
 	}
 
+	private async void OnEditTask(ScrumTask task) 
+	{
+		await boardService.UpdateTask(task);
+	}
 
 	private async void AddTask(State section)
 	{
@@ -118,7 +126,7 @@
 		var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall };
 		var result = DialogService.Show<NewTaskDialog>("Simple Dialog", parameters, options);
 		var resultData = await result.Result;
-		Models.ScrumTask newTask = (Models.ScrumTask)resultData.Data;
+		ScrumTask newTask = (ScrumTask)resultData.Data;
 		await boardService.CreateTask(newTask);
 		_tasks.Add(newTask);
 		section.NewTaskName = string.Empty;

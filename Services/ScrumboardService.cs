@@ -45,9 +45,11 @@ namespace BlazorScrumApp.Services
 			return data;
 		}
 
-		public Task<ScrumTask> UpdateTask()
+		public async Task<ScrumTask> UpdateTask(ScrumTask taskToUpdate)
 		{
-			throw new NotImplementedException();
+			var updatedTask = await _client.PutAsJsonAsync<ScrumTask>("https://localhost:7025/api/Task/UpdateTask", taskToUpdate);
+			var data = await updatedTask.Content.ReadFromJsonAsync<ScrumTask>();
+			return data;
 		}
 	}
 }
