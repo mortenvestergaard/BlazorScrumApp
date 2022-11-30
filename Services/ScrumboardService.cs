@@ -13,35 +13,39 @@ namespace BlazorScrumApp.Services
 			_client = client;
 		}
 
-		public async Task<List<Models.Task>> GetTasks()
+		public async Task<List<Models.ScrumTask>> GetTasks()
 		{
-			var response = await _client.GetFromJsonAsync<List<Models.Task>>("https://localhost:7025/api/Task/GetTasks");
-			return response;
+			var tasks = await _client.GetFromJsonAsync<List<Models.ScrumTask>>("https://localhost:7025/api/Task/GetTasks");
+			return tasks;
 		}
 
 		public async Task<List<State>> GetStates()
 		{
-			var response = await _client.GetFromJsonAsync<List<State>>("https://localhost:7025/api/State/GetStates");
-			return response;
+			var states = await _client.GetFromJsonAsync<List<State>>("https://localhost:7025/api/State/GetStates");
+			return states;
 		}
 
 		public async Task<List<User>> GetUsers()
 		{
-			var response = await _client.GetFromJsonAsync<List<User>>("https://localhost:7025/api/User/GetUsers");
-			return response;
+			var users = await _client.GetFromJsonAsync<List<User>>("https://localhost:7025/api/User/GetUsers");
+			return users;
 		}
 
-		public async System.Threading.Tasks.Task CreateState(State newState)
+		public async Task<State> CreateState(State newState)
 		{
-			await _client.PostAsJsonAsync<State>("https://localhost:7025/api/State/CreateState", newState);
+			var returnedState = await _client.PostAsJsonAsync<State>("https://localhost:7025/api/State/CreateState", newState);
+			var data = await returnedState.Content.ReadFromJsonAsync<State>();
+			return data;
 		}
 
-		public Task<Models.Task> UpdateTask()
+		public async Task<ScrumTask> CreateTask(ScrumTask newTask)
 		{
-			throw new NotImplementedException();
+			var returnedTask = await _client.PostAsJsonAsync<ScrumTask>("https://localhost:7025/api/Task/CreateTask", newTask);
+			var data = await returnedTask.Content.ReadFromJsonAsync<ScrumTask>();
+			return data;
 		}
 
-		public Task<Models.Task> CreateTask()
+		public Task<ScrumTask> UpdateTask()
 		{
 			throw new NotImplementedException();
 		}

@@ -1,6 +1,22 @@
-﻿<MudDialog>
+﻿@using BlazorScrumApp.Models
+
+<MudDialog>
     <DialogContent>
-        Dialog Content
+        <MudTextField Value="@SelectedState.Name" Label="Section" ReadOnly="true"></MudTextField>
+        <MudTextField @bind-Value="NewTask.Title" Label="new title"></MudTextField>
+        <MudTextField @bind-Value="NewTask.Description" Label="Description"></MudTextField>
+        <MudSelect @bind-Value="Assignee" Label="Asignee" Placeholder="Select Asignee">
+            @foreach (var asignee in Users)
+            {
+                <MudSelectItem Value="@asignee">@asignee.Username</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect @bind-Value="Reporter" Label="Reporter" Placeholder="Select Reporter">
+            @foreach (var reporter in Users)
+            {
+                <MudSelectItem Value="@reporter">@reporter.Username</MudSelectItem>
+            }
+        </MudSelect>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
@@ -10,6 +26,27 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    [Parameter] public State SelectedState { get; set; }
+    [Parameter] public List<User> Users { get; set; }
+    [Parameter] public int BoardId { get; set; }
+    public User Assignee { get; set; }
+    public User Reporter { get; set; }
+    public string NewTitle { get; set; }
+
+    Models.ScrumTask NewTask = new Models.ScrumTask();
+
+
+    void Submit()
+    {
+        NewTask.Board = new Board() { Id = BoardId, Name = "BoardOne"};
+        NewTask.BoardID = BoardId;
+        NewTask.State = SelectedState;
+        NewTask.StateID = SelectedState.Id;
+        NewTask.AssigneeID = Assignee.Id;
+        NewTask.ReporterID = Reporter.Id;
+        NewTask.Assignee = Assignee;
+        NewTask.Reporter = Reporter;
+        MudDialog.Close(DialogResult.Ok(NewTask));
+    } 
     void Cancel() => MudDialog.Cancel();
 }

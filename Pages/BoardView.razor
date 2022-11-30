@@ -9,7 +9,7 @@
 @inject ScrumboardService boardService
 @inject IDialogService DialogService
 
-<MudDropContainer T="Models.Task" @ref="_dropContainer" Items="@_tasks" ItemsSelector="@((item,column) => item.State.Name == column)" ItemDropped="TaskUpdated" Class="d-flex flex-row">
+<MudDropContainer T="Models.ScrumTask" Items="_tasks" @ref="_dropContainer" ItemsSelector="@((item,column) => item.State.Name == column)" ItemDropped="TaskUpdated" Class="d-flex flex-row">
 	<ChildContent>
 		@foreach (var item in _sections)
 		{
@@ -22,8 +22,8 @@
 						<MudButton Size="Size.Small" Color="Color.Default" StartIcon="@Icons.Rounded.Edit">Rename Section</MudButton>
 					</MudMenu>
 				</MudToolBar>
-				<MudDropZone T="Models.Task" Identifier="@item.Name" Class="mud-height-full" />
-				@if (item.NewTaskOpen)
+				<MudDropZone T="Models.ScrumTask" Identifier="@item.Name" Class="mud-height-full" />
+				@if (!item.NewTaskOpen)
 				{
 
 						<MudButton OnClick="@(() => AddTask(item))" StartIcon="@Icons.Filled.Add" Color="Color.Primary" FullWidth="true">Add Task</MudButton>
@@ -37,9 +37,9 @@
 			@if (_addSectionOpen)
 			{
 				<MudPaper Elevation="0" Width="224px" Class="pa-4 d-flex flex-column mud-background-gray rounded-lg">
-					<EditForm Model="@newStateModel" OnValidSubmit="OnValidSectionSubmit">
+					<EditForm Model="@newState" OnValidSubmit="OnValidSectionSubmit">
 						<DataAnnotationsValidator />
-						<MudTextField @bind-Value="newStateModel.Name" For="@(() => newStateModel.Name)" Placeholder="New Section" DisableUnderLine="true"></MudTextField>
+						<MudTextField @bind-Value="newState.Name" For="@(() => newState.Name)" Placeholder="New Section" DisableUnderLine="true"></MudTextField>
 						<MudButton ButtonType="ButtonType.Submit" Size="Size.Small" Color="Color.Primary" FullWidth="true">Add Section</MudButton>
 					</EditForm>
 				</MudPaper>
@@ -57,19 +57,14 @@
 
 @code {
 	/*Maybe should not be nullable?*/
-	private MudDropContainer<Models.Task>? _dropContainer;
+	private MudDropContainer<Models.ScrumTask>? _dropContainer;
 
 	private bool _addSectionOpen;
 	/* handling board events */
-	private void TaskUpdated(MudItemDropInfo<Models.Task> info)
+	private void TaskUpdated(MudItemDropInfo<Models.ScrumTask> info)
 	{
 		info.Item.State.Name = info.DropzoneIdentifier;
 	}
-
-	[CascadingParameter] MudDialogInstance MudDialog { get; set; }
-
-	void Submit() => MudDialog.Close(DialogResult.Ok(true));
-	void Cancel() => MudDialog.Cancel();
 
 	private List<State> _sections = new()
 	{
@@ -78,52 +73,54 @@
 
 	private List<User> _users = new();
 
-	private List<Models.Task> _tasks = new()
+	private List<Models.ScrumTask> _tasks = new()
 	{
 
 	};
 
 
-	public class KanBanNewForm
-	{
-		[Required]
-		[StringLength(10, ErrorMessage = "Name length can't be more than 10.")]
-		public string Name { get; set; }
-	}
-
 	protected override async System.Threading.Tasks.Task OnInitializedAsync()
 	{
 		var states = await boardService.GetStates();
-		var users = await boardService.GetUsers();
-		var tasks = await boardService.GetTasks();
 		_sections.AddRange(states);
+		var users = await boardService.GetUsers();
 		_users.AddRange(users);
+		var tasks = await boardService.GetTasks();
 		_tasks.AddRange(tasks);
 
 	}
 
-	State newStateModel = new State();
+	State newState = new State();
 
 	private async System.Threading.Tasks.Task OnValidSectionSubmit(EditContext context)
 	{
 		State newState = new State();
 		await boardService.CreateState(newState);
 		_sections.Add(newState);
-		newStateModel = new State();
+		newState = new State();
 		_addSectionOpen = false;
 	}
 
 	private void OpenAddNewSection()
 	{
-		
+
 		_addSectionOpen = true;
 	}
 
 
-	private void AddTask(State section)
+	private async void AddTask(State section)
 	{
-		var options = new DialogOptions { CloseOnEscapeKey = true };
-		DialogService.Show<NewTaskDialog>("Simple Dialog", options);
+		var parameters = new DialogParameters();
+		parameters.Add("SelectedState", section);
+		parameters.Add("Users", _users);
+		parameters.Add("BoardId", 1);
+
+		var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall };
+		var result = DialogService.Show<NewTaskDialog>("Simple Dialog", parameters, options);
+		var resultData = await result.Result;
+		Models.ScrumTask newTask = (Models.ScrumTask)resultData.Data;
+		await boardService.CreateTask(newTask);
+		_tasks.Add(newTask);
 		section.NewTaskName = string.Empty;
 		section.NewTaskOpen = false;
 		_dropContainer.Refresh();
