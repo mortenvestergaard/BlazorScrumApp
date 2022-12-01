@@ -45,11 +45,24 @@ namespace BlazorScrumApp.Services
 			return data;
 		}
 
+		public async Task<ScrumTask> UpdateTaskState(ScrumTask taskToUpdate)
+		{
+			var updatedTask = await _client.PutAsJsonAsync<ScrumTask>("https://localhost:7025/api/Task/UpdateTaskState", taskToUpdate);
+			var data = await updatedTask.Content.ReadFromJsonAsync<ScrumTask>();
+			return data;
+		}
+
 		public async Task<ScrumTask> UpdateTask(ScrumTask taskToUpdate)
 		{
 			var updatedTask = await _client.PutAsJsonAsync<ScrumTask>("https://localhost:7025/api/Task/UpdateTask", taskToUpdate);
 			var data = await updatedTask.Content.ReadFromJsonAsync<ScrumTask>();
 			return data;
 		}
-	}
+
+        public async Task<HttpResponseMessage> DeleteTask(int taskId)
+        {
+			var response = await _client.PostAsJsonAsync("https://localhost:7025/api/Task/DeleteTask", taskId);
+            return response;
+        }
+    }
 }

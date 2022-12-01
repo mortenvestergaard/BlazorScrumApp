@@ -1,0 +1,33 @@
+﻿@using BlazorScrumApp.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="Task.Title" Label="Title"></MudTextField>
+        <MudTextField @bind-Value="Task.Description" Label="Description" Lines="5"></MudTextField>
+        <MudSelect @bind-Value="Task.AssigneeID" Label="Asignee" Placeholder="Assignee">
+            @foreach (var asignee in Users)
+            {
+                <MudSelectItem Value="@asignee.Id">@asignee.Username</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect @bind-Value="Task.ReporterID" Label="Reporter" Placeholder="Reporter">
+            @foreach (var reporter in Users)
+            {
+                <MudSelectItem Value="@reporter.Id">@reporter.Username</MudSelectItem>
+            }
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public ScrumTask Task { get; set; }
+    [Parameter] public List<User> Users { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(Task));
+    void Cancel() => MudDialog.Cancel();
+}
