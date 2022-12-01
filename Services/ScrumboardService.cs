@@ -59,10 +59,16 @@ namespace BlazorScrumApp.Services
 			return data;
 		}
 
-        public async Task<HttpResponseMessage> DeleteTask(int taskId)
+        public async Task<HttpResponseMessage> DeleteTask(ScrumTask task)
         {
-			var response = await _client.PostAsJsonAsync("https://localhost:7025/api/Task/DeleteTask", taskId);
+			var response = await _client.PostAsJsonAsync("https://localhost:7025/api/Task/DeleteTask", task);
             return response;
         }
-    }
+
+		public async Task<HttpResponseMessage> DeleteState(State state)
+		{
+			var response = await _client.PostAsJsonAsync("https://localhost:7025/api/State/DeleteState", state);
+			return response;
+		}
+	}
 }

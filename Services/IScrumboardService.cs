@@ -5,14 +5,18 @@ namespace BlazorScrumApp.Services
 {
     public interface IScrumboardService
     {
+        //Tasks
         Task<List<ScrumTask>> GetTasks();
-        Task<List<State>> GetStates();
-        Task<List<User>> GetUsers();
         Task<ScrumTask> CreateTask(ScrumTask task);
-        Task<State> CreateState(State state);
         Task<ScrumTask> UpdateTask(ScrumTask task);
         Task<ScrumTask> UpdateTaskState(ScrumTask task);
-        Task<HttpResponseMessage> DeleteTask(int taskId);
+        Task<HttpResponseMessage> DeleteTask(ScrumTask task);
+        //State
+        Task<List<State>> GetStates();
+        Task<State> CreateState(State state);
+        Task<HttpResponseMessage> DeleteState(State state);
+        //User
+        Task<List<User>> GetUsers();
 
     }
 }
