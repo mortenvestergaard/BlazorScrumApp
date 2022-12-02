@@ -7,7 +7,7 @@
   "linkerEnabled": true,
   "resources": {
     "assembly": {
-      "BlazorScrumApp.dll": "sha256-vaA6OlyZv3UD2RbnBQZT5\/D72R9ZcG5LA9mlgdDrG5A=",
+      "BlazorScrumApp.dll": "sha256-tZ9bhT+6oxsBfKvBeWNvsrHMymOZShfsF5ULwwKncSM=",
       "EntityFramework.dll": "sha256-6tusYE7+HqAnLRKF9I41hUGXiqHRmO8EILDlIseTuLQ=",
       "EntityFramework.SqlServer.dll": "sha256-vivNycD\/SihlyOUpb2o8h8IkEf8mjl7\/MP3PX4slYeI=",
       "Microsoft.AspNetCore.Components.dll": "sha256-ttZazDOv0BmC5L9aAPUaq\/O2n10WJpTXxLa9mxxcdWA=",
