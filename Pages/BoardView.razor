@@ -1,4 +1,5 @@
 ﻿@page "/"
+@page "/boardview"
 
 @using Microsoft.AspNetCore.Components
 @using System.ComponentModel.DataAnnotations
@@ -18,7 +19,8 @@
                     <MudText Typo="Typo.subtitle1"><b>@item.Name</b></MudText>
                     <MudSpacer />
                     <MudMenu Icon="@Icons.Material.Rounded.MoreHoriz" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" ListClass="pa-2 d-flex flex-column" PopoverClass="mud-elevation-25">
-                        <MudButton Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Outlined.Delete" OnClick="@(() => OnDeleteSection(item))">Delete Section</MudButton>
+                        <MudButton Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Outlined.Delete" OnClick="@( () => DeleteSection(item))">Delete Section</MudButton>
+                        <MudButton Size="Size.Small" Color="Color.Default" StartIcon="@Icons.Rounded.Edit">Rename Section</MudButton>
                     </MudMenu>
                 </MudToolBar>
                 <MudDropZone T="ScrumTask" Identifier="@item.Name" Class="mud-height-full" />
@@ -53,8 +55,8 @@
         <MudPaper Elevation="25" Class="pa-4 rounded-lg my-3">
             <MudText Typo="Typo.h6">@($"{context.Title}")</MudText>
                 <MudText Typo="Typo.body2">@context.Description</MudText>
-                <MudButton OnClick="@(() => OnEditTask(context))" Variant="Variant.Filled" Color="Color.Warning" DisableRipple="true">Edit</MudButton>
-                <MudButton OnClick="@(() => OnDeleteTask(context))" Variant="Variant.Filled" Color="Color.Secondary" DisableRipple="true">Delete</MudButton>
+                <MudButton OnClick="@(() => OnEditTask(context))" Variant="Variant.Filled" Color="Color.Info" DisableRipple="true">Edit</MudButton>
+                <MudButton OnClick="@(() => OnDeleteTask(context))" Variant="Variant.Filled" Color="Color.Warning" DisableRipple="true">Delete</MudButton>
             </MudPaper>
         </ItemRenderer>
     </MudDropContainer>
@@ -102,6 +104,7 @@
     State newState = new State();
     private async Task OnValidSectionSubmit(EditContext context)
     {
+        State newState = new State();
         await boardService.CreateState(newState);
         _sections.Add(newState);
         newState = new State();
@@ -122,14 +125,16 @@
 
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall };
         var result = DialogService.Show<EditTaskDialog>("Edit Task", parameters, options);
-        if (result != null)
+
+        var resultData = await result.Result;
+        if (!resultData.Cancelled)
         {
-            var resultData = await result.Result;
             ScrumTask updatedTask = (ScrumTask)resultData.Data;
             ScrumTask taskFromApi = await boardService.UpdateTask(updatedTask);
             taskFromApi = _tasks.First(i => i.Id == taskFromApi.Id);
-            _dropContainer.Refresh();
         }
+        _dropContainer.Refresh();
+
     }
 
     private async void AddTask(State section)
@@ -155,14 +160,17 @@
 
     private async void OnDeleteTask(ScrumTask task)
     {
-        var respMsg = await boardService.DeleteTask(task);
-        if (respMsg != null)
+        var resp = await boardService.DeleteTask(task);
+        string respMsg = await resp.Content.ReadAsStringAsync();
+        if (respMsg == "Ok")
         {
             _tasks.Remove(task);
+
         }
+        _dropContainer.Refresh();
     }
 
-    private async void OnDeleteSection(State section)
+    private void DeleteSection(State section)
     {
         if (_sections.Count == 1)
         {
@@ -177,13 +185,7 @@
                 newIndex = 0;
             }
 
-            var tasksInSection = _tasks.Where(e => e.State.Name == section.Name).ToList();
-            if (tasksInSection.Count <= 0)
-            {
-                await boardService.DeleteState(section);
-                _sections.Remove(section);
-            }
-
+            _sections.Remove(section);
 
             var tasks = _tasks.Where(x => x.State.Name == section.Name);
             foreach (var item in tasks)
@@ -191,6 +193,5 @@
                 item.State.Name = _sections[newIndex].Name;
             }
         }
-        _dropContainer.Refresh();
     }
 }
