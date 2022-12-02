@@ -1,0 +1,25 @@
+﻿<MudDialog>
+    <DialogContent>
+        Are you sure you want to delete the task?
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Warning" OnClick="Submit">Delete</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    @code {
+        [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+        [Parameter] public bool ShouldDelete { get; set; }
+
+        void Submit()
+        {
+            ShouldDelete = true;
+            MudDialog.Close(DialogResult.Ok<bool>(true));
+        }
+        void Cancel() => MudDialog.Cancel();
+    }
+
+}

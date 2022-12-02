@@ -6,9 +6,12 @@
 @using BlazorScrumApp.Models
 @using BlazorScrumApp.Services
 @using System.Threading.Tasks
+@using Blazored.Toast
+@using Blazored.Toast.Services
 @inject HttpClient Http
 @inject ScrumboardService boardService
 @inject IDialogService DialogService
+@inject IToastService toastService
 
 <MudDropContainer T="ScrumTask" Items="_tasks" @ref="_dropContainer" ItemsSelector="@((item,column) => item.State.Name == column)" ItemDropped="TaskUpdated" Class="d-flex flex-row">
     <ChildContent>
@@ -150,23 +153,33 @@
         {
             var resultData = await result.Result;
             ScrumTask newTask = (ScrumTask)resultData.Data;
-            await boardService.CreateTask(newTask);
-            _tasks.Add(newTask);
-            await boardService.SendEmailOnTaskCreated(newTask.Assignee);
-            section.NewTaskName = string.Empty;
-            section.NewTaskOpen = false;
+            var newTaskFromDb = await boardService.CreateTask(newTask);
+            if (newTaskFromDb.Id != null)
+            {
+                _tasks.Add(newTaskFromDb);
+                await boardService.SendEmailOnTaskCreated(newTask.Assignee);
+                section.NewTaskName = string.Empty;
+                section.NewTaskOpen = false;
+            }
             _dropContainer.Refresh();
         }
     }
 
     private async void OnDeleteTask(ScrumTask task)
     {
-        var resp = await boardService.DeleteTask(task);
-        string respMsg = await resp.Content.ReadAsStringAsync();
-        if (respMsg == "Ok")
-        {
-            _tasks.Remove(task);
 
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium };
+        var result = DialogService.Show<DeleteTaskDialog>("Delete Task", options);
+        var data = await result.Result;
+        if (!data.Cancelled)
+        {
+            var resp = await boardService.DeleteTask(task);
+            string respMsg = await resp.Content.ReadAsStringAsync();
+            if (respMsg == "Ok")
+            {
+                _tasks.Remove(task);
+
+            }
         }
         _dropContainer.Refresh();
     }
