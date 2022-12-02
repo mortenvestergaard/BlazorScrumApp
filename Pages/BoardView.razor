@@ -152,6 +152,7 @@
             ScrumTask newTask = (ScrumTask)resultData.Data;
             await boardService.CreateTask(newTask);
             _tasks.Add(newTask);
+            await boardService.SendEmailOnTaskCreated(newTask.Assignee);
             section.NewTaskName = string.Empty;
             section.NewTaskOpen = false;
             _dropContainer.Refresh();

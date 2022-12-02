@@ -70,5 +70,11 @@ namespace BlazorScrumApp.Services
 			var response = await _client.PostAsJsonAsync("https://7541-93-176-82-57.eu.ngrok.io/api/State/DeleteState", state);
 			return response;
 		}
-	}
+
+        public async Task<HttpResponseMessage> SendEmailOnTaskCreated(User user)
+        {
+			var response = await _client.PostAsJsonAsync("https://7541-93-176-82-57.eu.ngrok.io/api/User/SendEmail", user);
+			return response;
+        }
+    }
 }

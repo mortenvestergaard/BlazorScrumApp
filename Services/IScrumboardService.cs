@@ -17,6 +17,7 @@ namespace BlazorScrumApp.Services
         Task<HttpResponseMessage> DeleteState(State state);
         //User
         Task<List<User>> GetUsers();
+        Task<HttpResponseMessage> SendEmailOnTaskCreated(User user);
 
     }
 }
