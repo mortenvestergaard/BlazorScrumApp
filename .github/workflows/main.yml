@@ -1,4 +1,4 @@
-name: BlazorScrumApp
+name: github pages
 # Run workflow on every push to the master branch
 on:
   push:
