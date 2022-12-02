@@ -16,7 +16,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.11
-        # publishes Blazor project to the release-folder
+        # publishes Blazor project to the release-folder f
     - name: Publish .NET Core Project
       run: dotnet publish BlazorScrumApp.csproj -c Release -o release --nologo
           
