@@ -1,3 +1,5 @@
+using Blazored.LocalStorage;
+using Blazored.Toast;
 using BlazorScrumApp;
 using BlazorScrumApp.Services;
 using Microsoft.AspNetCore.Components.Web;
@@ -10,6 +12,8 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { });
 builder.Services.AddMudServices();
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddBlazoredToast();
 
 builder.Services.AddScoped(sp =>
 {

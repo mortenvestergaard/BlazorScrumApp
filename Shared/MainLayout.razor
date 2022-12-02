@@ -1,7 +1,9 @@
 ﻿@inherits LayoutComponentBase
-<MudThemeProvider />
+@inject ILocalStorageService localStorageService
+<MudThemeProvider @bind-IsDarkMode="_toggleDarkTheme"/>
 <MudDialogProvider />
 <MudSnackbarProvider />
+
 
 <MudLayout>
     <MudAppBar Elevation="1">
@@ -9,7 +11,8 @@
         <MudText Typo="Typo.h5" Class="ml-3">Scrum App</MudText>
         @*MudSpacer adds nav bar spacing so content under MudSpacer is placed to the right*@
         <MudSpacer/>
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.Start"/>
+        <MudIcon Icon="@Icons.Material.Filled.ModeNight" Title="Toggle theme"/>
+        <MudSwitch Checked="DarkThemeToggle"/>
     </MudAppBar>
     <MudDrawer @bind-Open="@_drawerOpen" Elevation="2" ClipMode="DrawerClipMode.Always">
         @*Opens the NavMenu razor shared view*@
@@ -26,10 +29,17 @@
 </MudLayout>
 
 @code {
-    bool _drawerOpen = true;
+    bool _drawerOpen;
+    bool _toggleDarkTheme;
 
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    async void DarkThemeToggle()
+    {
+        _toggleDarkTheme = !_toggleDarkTheme;
+        await localStorageService.SetItemAsync("Theme", _toggleDarkTheme);
     }
 }
