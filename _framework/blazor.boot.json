@@ -9,7 +9,7 @@
     "assembly": {
       "Blazored.LocalStorage.dll": "sha256-Jq\/dS58mO5wtL2d0x\/FeAdDZ1bUTpTzPODJpBZUre\/4=",
       "Blazored.Toast.dll": "sha256-6cGnZ9WDP6hzM+ZRdvG+94hYjOke+bTjbJ5Xyawsp0M=",
-      "BlazorScrumApp.dll": "sha256-h1dFvZu8\/Al+5EnY5L+rzCaypRQRTIuicNx\/XpQopB0=",
+      "BlazorScrumApp.dll": "sha256-FOnLXToxXnFvnYNRRQYQIpFT\/XocgAD9J2uBPub0mhc=",
       "EntityFramework.dll": "sha256-6tusYE7+HqAnLRKF9I41hUGXiqHRmO8EILDlIseTuLQ=",
       "EntityFramework.SqlServer.dll": "sha256-vivNycD\/SihlyOUpb2o8h8IkEf8mjl7\/MP3PX4slYeI=",
       "Microsoft.AspNetCore.Components.dll": "sha256-TBypOJvSjuQ6jv7yqaoX55h5S2hIQkmcA031kT+99go=",
@@ -57,7 +57,7 @@
       "System.Linq.Expressions.dll": "sha256-fpeaZwA6FpHLh974Q8Ww45l6N5fxd5LBzz\/f0Lx04zc=",
       "System.Linq.Queryable.dll": "sha256-Lg1tanSOOFuv1s2z92UQbqT4ZBv6PzW8LFvZj7ityZI=",
       "System.Memory.dll": "sha256-0CYN3qnLZ6R9RoHBd7vs3RoE3UIR3+OIsmP3UkFefzs=",
-      "System.Net.Http.dll": "sha256-dbyWZLGHzKoh+0Tq05EktE6hbmRJydunZbLQ+fPUEPc=",
+      "System.Net.Http.dll": "sha256-R7HCit4ECSlCxJqlUJJK4xDTKBKZ7tn64mnci3Fc2ko=",
       "System.Net.Http.Json.dll": "sha256-59LcAh3dw1FPYn09Wpo7SCgOcUeV9DbObHBd41QrZaI=",
       "System.Net.Primitives.dll": "sha256-fFJ0Z1LYp2dSrm5y7s2tyqN5FIpIlLoGLEYeN62zVPY=",
       "System.Net.WebClient.dll": "sha256-WMlI4ggQCkC8WpxcVsewURRHVaVRK1y+4Tvo836sTDc=",
