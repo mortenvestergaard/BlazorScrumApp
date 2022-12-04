@@ -76,5 +76,10 @@ namespace BlazorScrumApp.Services
 			var response = await _client.PostAsJsonAsync("https://ad8e-188-179-43-7.eu.ngrok.io/api/User/SendEmail", user);
 			return response;
         }
-    }
+
+		public async Task ClearBoard()
+		{
+			await _client.GetAsync("https://ad8e-188-179-43-7.eu.ngrok.io/api/User/ClearBoard");
+		}
+	}
 }

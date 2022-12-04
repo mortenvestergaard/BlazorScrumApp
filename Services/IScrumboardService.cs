@@ -18,6 +18,8 @@ namespace BlazorScrumApp.Services
         //User
         Task<List<User>> GetUsers();
         Task<HttpResponseMessage> SendEmailOnTaskCreated(User user);
+        //Board
+        Task ClearBoard();
 
     }
 }

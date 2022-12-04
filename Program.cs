@@ -20,5 +20,4 @@ builder.Services.AddScoped(sp =>
     var http = sp.GetService<HttpClient>();
     return new ScrumboardService(http);
 });
-//builder.Services.AddSingleton<IScrumboardService, ScrumboardService>();
 await builder.Build().RunAsync();

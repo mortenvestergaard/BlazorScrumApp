@@ -13,7 +13,7 @@
         @*MudSpacer adds nav bar spacing so content under MudSpacer is placed to the right*@
         <MudSpacer/>
         <MudIcon Icon="@Icons.Material.Filled.ModeNight" Title="Toggle theme"/>
-        <MudSwitch Checked="DarkThemeToggle"/>
+        <MudSwitch @bind-Checked="_toggleDarkTheme" />
     </MudAppBar>
     <MudDrawer @bind-Open="@_drawerOpen" Elevation="2" ClipMode="DrawerClipMode.Always">
         @*Opens the NavMenu razor shared view*@
@@ -24,9 +24,6 @@
         @Body
     </MudContainer>
 </MudMainContent>
-@*    <MudMainContent>
-        @Body
-    </MudMainContent>*@
 </MudLayout>
 
 @code {
@@ -38,6 +35,7 @@
         _drawerOpen = !_drawerOpen;
     }
 
+    //Toggles the dark theme on the top right corner of the application. This data is stored in local storage as "Theme"
     async void DarkThemeToggle()
     {
         _toggleDarkTheme = !_toggleDarkTheme;

@@ -52,6 +52,7 @@
             {
                 <MudButton OnClick="OpenAddNewSection" Variant="Variant.Outlined" StartIcon="@Icons.Filled.Add" Color="Color.Primary" Class="rounded-lg py-2" FullWidth="true">Add Section</MudButton>
             }
+            <MudButton OnClick="ClearBoard" Variant="Variant.Outlined" Color="Color.Primary" Class="rounded-lg py-2" FullWidth="true">Clear Board</MudButton>
         </MudPaper>
     </ChildContent>
     <ItemRenderer>
@@ -65,10 +66,8 @@
     </MudDropContainer>
 
     @code {
-    /*Maybe should not be nullable?*/
     private MudDropContainer<ScrumTask>? _dropContainer;
 
-    private bool _addSectionOpen;
     /* handling board events */
     private async void TaskUpdated(MudItemDropInfo<ScrumTask> info)
     {
@@ -80,19 +79,17 @@
         _dropContainer.Refresh();
     }
 
-    private List<State> _sections = new()
-    {
+    //Contains stats from the database
+    private List<State> _sections = new();
 
-    };
-
+    //Contains users from the database
     private List<User> _users = new();
 
-    private List<ScrumTask> _tasks = new()
-    {
-
-    };
+    //Contains the tasks from the database
+    private List<ScrumTask> _tasks = new();
 
 
+    //Calls the database to fill out the lists to create the scrumboard when site is initialized
     protected override async Task OnInitializedAsync()
     {
         var states = await boardService.GetStates();
@@ -104,6 +101,7 @@
 
     }
 
+    //When creating a new state/section
     State newState = new State();
     private async Task OnValidSectionSubmit(EditContext context)
     {
@@ -114,12 +112,15 @@
         _addSectionOpen = false;
     }
 
+    //Creating a new state
+    private bool _addSectionOpen;
     private void OpenAddNewSection()
     {
 
         _addSectionOpen = true;
     }
 
+    //Called when clicking on the Edit button on a task
     private async void OnEditTask(ScrumTask task)
     {
         var parameters = new DialogParameters();
@@ -140,6 +141,15 @@
 
     }
 
+    //Called when the Clear Board button is clicked
+    public async void ClearBoard()
+    {
+        await boardService.ClearBoard();
+        _sections.RemoveRange(0, _sections.Count);
+        _tasks.RemoveRange(0, _tasks.Count);
+    }
+
+    //Called when a new task is being created
     private async void AddTask(State section)
     {
         var parameters = new DialogParameters();
@@ -165,6 +175,7 @@
         }
     }
 
+    //Called when the Delete button on a task is pressed
     private async void OnDeleteTask(ScrumTask task)
     {
 
@@ -184,28 +195,16 @@
         _dropContainer.Refresh();
     }
 
-    private void DeleteSection(State section)
+    //Called when clicking the little button on top of each section
+    private async void DeleteSection(State section)
     {
-        if (_sections.Count == 1)
-        {
-            _tasks.Clear();
-            _sections.Clear();
-        }
-        else
-        {
-            int newIndex = _sections.IndexOf(section) - 1;
-            if (newIndex < 0)
-            {
-                newIndex = 0;
-            }
 
+        var dbResp = await boardService.DeleteState(section);
+        string respMsg = await dbResp.Content.ReadAsStringAsync();
+        if (respMsg == "Ok")
+        {
             _sections.Remove(section);
-
-            var tasks = _tasks.Where(x => x.State.Name == section.Name);
-            foreach (var item in tasks)
-            {
-                item.State.Name = _sections[newIndex].Name;
-            }
         }
+        _dropContainer.Refresh();
     }
 }
